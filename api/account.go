@@ -1,10 +1,12 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	db "github.com/phantom-sage/simplebank/db/sqlc"
 )
 
@@ -26,6 +28,10 @@ func (server *Server) createAccount(ctx *gin.Context) {
 		Balance:  int64(0),
 	})
 	if err != nil {
+		if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
+			ctx.JSON(http.StatusForbidden, errorResponse(pgErr))
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}

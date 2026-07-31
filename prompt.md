@@ -82,3 +82,18 @@ sql:
 `.
 7. Initalize the GoLang module using `go mod init github.com/phantom-sage/simplebank` and run `go mod tidy` to grap the dependencies.
 8. When listing rows from database tables paginate them with `LIMIT` and `OFFSET`.
+9. Return meaningful error messages from APIs to the clients if the error on the client side, and don't reveal internal bebug info when error is on server side but also return meaningful error message to the user
+10. Update database schema by adding new users table with new constraints `
+CREATE TABLE "users" (
+  "username" varchar PRIMARY KEY,
+  "hashed_password" varchar NOT NULL,
+  "full_name" varchar NOT NULL,
+  "email" varchar UNIQUE NOT NULL,
+  "password_changed_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z',
+  "created_at" timestamptz NOT NULL DEFAULT (now())
+);
+
+
+ALTER TABLE "accounts" ADD FOREIGN KEY ("owner") REFERENCES "users" ("username") DEFERRABLE INITIALLY IMMEDIATE;
+CREATE UNIQUE INDEX ON "accounts" ("owner", "currency");
+`.
