@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	mockdb "github.com/phantom-sage/simplebank/db/mock"
 	db "github.com/phantom-sage/simplebank/db/sqlc"
 	"github.com/stretchr/testify/require"
@@ -94,13 +94,104 @@ func TestGetAccountAPI(t *testing.T) {
 	}
 }
 
+func TestCreateAccountAPI(t *testing.T) {
+	account := db.Account{
+		ID:        gofakeit.Int64(),
+		Owner:     gofakeit.HackerNoun(),
+		Balance:   int64(0),
+		Currency:  gofakeit.RandomString([]string{"USD", "EUR"}),
+		CreatedAt: time.Now(),
+	}
+
+	testCases := []struct {
+		name          string
+		body          gin.H
+		buildStubs    func(store *mockdb.MockStore)
+		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name: "OK",
+			body: gin.H{
+				"owner":    account.Owner,
+				"currency": account.Currency,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.CreateAccountParams{
+					Owner:    account.Owner,
+					Currency: account.Currency,
+					Balance:  int64(0),
+				}
+				store.EXPECT().CreateAccount(gomock.Any(), gomock.Eq(arg)).Times(1).Return(account, nil)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+				requireBodyMatchAccount(t, recorder.Body, account)
+			},
+		},
+		{
+			name: "InternalError",
+			body: gin.H{
+				"owner":    account.Owner,
+				"currency": account.Currency,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				arg := db.CreateAccountParams{
+					Owner:    account.Owner,
+					Currency: account.Currency,
+					Balance:  int64(0),
+				}
+				store.EXPECT().CreateAccount(gomock.Any(), gomock.Eq(arg)).Times(1).Return(db.Account{}, pgx.ErrTxClosed)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+			},
+		},
+		{
+			name: "BadRequest",
+			body: gin.H{},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().CreateAccount(gomock.Any(), gomock.Any()).Times(0)
+			},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i]
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			store := mockdb.NewMockStore(ctrl)
+
+			// build stubs.
+			tc.buildStubs(store)
+
+			// start test HTTP server.
+			server := NewServer(store)
+			recorder := httptest.NewRecorder()
+
+			url := "/api/accounts"
+			data, err := json.Marshal(tc.body)
+			reader := bytes.NewReader(data)
+			require.NoError(t, err)
+
+			req, err := http.NewRequest(http.MethodPost, url, reader)
+			require.NoError(t, err)
+
+			server.router.ServeHTTP(recorder, req)
+			tc.checkResponse(t, recorder)
+		})
+	}
+}
+
 func createRandomAccount() db.Account {
 	return db.Account{
 		ID:        gofakeit.Int64(),
 		Owner:     gofakeit.HackerNoun(),
 		Balance:   gofakeit.Int64(),
 		Currency:  gofakeit.RandomString([]string{"USD", "EUR"}),
-		CreatedAt: pgtype.Timestamptz{Time: time.Now(), Valid: true},
+		CreatedAt: time.Now(),
 	}
 }
 
@@ -116,5 +207,5 @@ func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, account db.Accoun
 	require.Equal(t, account.Owner, gotAccount.Owner)
 	require.Equal(t, account.Balance, gotAccount.Balance)
 	require.Equal(t, account.Currency, gotAccount.Currency)
-	require.WithinDuration(t, account.CreatedAt.Time, gotAccount.CreatedAt.Time, time.Second)
+	require.WithinDuration(t, account.CreatedAt, gotAccount.CreatedAt, time.Second)
 }

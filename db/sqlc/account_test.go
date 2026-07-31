@@ -11,12 +11,13 @@ import (
 )
 
 func createRandomAccount(t *testing.T) Account {
-	randomOwnerName := gofakeit.HackerNoun()
+	user := createRandomUser(t)
+
 	randomCurrency := gofakeit.RandomString([]string{"USD", "EUR"})
 	randomBalance := gofakeit.Int64()
 
 	arg := CreateAccountParams{
-		Owner:    randomOwnerName,
+		Owner:    user.Username,
 		Balance:  randomBalance,
 		Currency: randomCurrency,
 	}
@@ -27,7 +28,7 @@ func createRandomAccount(t *testing.T) Account {
 	require.NotZero(t, account.ID)
 	require.NotZero(t, account.CreatedAt)
 
-	require.Equal(t, account.Owner, randomOwnerName)
+	require.Equal(t, account.Owner, user.Username)
 	require.Equal(t, account.Balance, randomBalance)
 	require.Equal(t, account.Currency, randomCurrency)
 
@@ -51,7 +52,7 @@ func TestGetAccount(t *testing.T) {
 	require.Equal(t, account1.Balance, account2.Balance)
 	require.Equal(t, account1.Currency, account2.Currency)
 
-	require.WithinDuration(t, account1.CreatedAt.Time, account2.CreatedAt.Time, time.Second)
+	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
 }
 
 func TestGetAccountForUpdate(t *testing.T) {
@@ -67,7 +68,7 @@ func TestGetAccountForUpdate(t *testing.T) {
 	require.Equal(t, account1.Balance, account2.Balance)
 	require.Equal(t, account1.Currency, account2.Currency)
 
-	require.WithinDuration(t, account1.CreatedAt.Time, account2.CreatedAt.Time, time.Second)
+	require.WithinDuration(t, account1.CreatedAt, account2.CreatedAt, time.Second)
 }
 
 func TestUpdateAccount(t *testing.T) {
@@ -87,7 +88,7 @@ func TestUpdateAccount(t *testing.T) {
 	require.Equal(t, account1.Owner, account2.Owner)
 	require.Equal(t, account1.Currency, account2.Currency)
 	require.Equal(t, newAccountBalance, account2.Balance)
-	require.Equal(t, account1.CreatedAt.Time, account2.CreatedAt.Time)
+	require.Equal(t, account1.CreatedAt, account2.CreatedAt)
 }
 
 func TestDeleteAccount(t *testing.T) {
@@ -119,6 +120,6 @@ func TestListAccounts(t *testing.T) {
 	for _, account := range accounts {
 		require.NotEmpty(t, account)
 		require.NotZero(t, account.ID)
-		require.NotZero(t, account.CreatedAt.Time)
+		require.NotZero(t, account.CreatedAt)
 	}
 }

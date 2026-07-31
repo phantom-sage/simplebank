@@ -23,7 +23,7 @@ func createRandomEntry(t *testing.T) Entry {
 	require.NotEmpty(t, entry)
 
 	require.NotZero(t, entry.ID)
-	require.NotZero(t, entry.CreatedAt.Time)
+	require.NotZero(t, entry.CreatedAt)
 
 	require.Equal(t, randomAccount.ID, entry.AccountID.Int64)
 	require.Equal(t, randomAmount, entry.Amount)
@@ -45,7 +45,7 @@ func TestGetEntry(t *testing.T) {
 	require.Equal(t, entry1.AccountID.Int64, entry2.AccountID.Int64)
 	require.Equal(t, entry1.Amount, entry2.Amount)
 
-	require.WithinDuration(t, entry1.CreatedAt.Time, entry2.CreatedAt.Time, time.Second)
+	require.WithinDuration(t, entry1.CreatedAt, entry2.CreatedAt, time.Second)
 }
 
 func TestListEntries(t *testing.T) {
@@ -67,7 +67,7 @@ func TestListEntries(t *testing.T) {
 		require.NotEmpty(t, entry.Amount)
 		require.NotZero(t, entry.ID)
 		require.NotZero(t, entry.AccountID.Int64)
-		require.NotZero(t, entry.CreatedAt.Time)
+		require.NotZero(t, entry.CreatedAt)
 	}
 }
 
@@ -85,7 +85,7 @@ func TestUpdateEntry(t *testing.T) {
 	require.NotEmpty(t, entry2)
 
 	require.NotZero(t, entry2.ID)
-	require.Equal(t, entry1.CreatedAt.Time, entry2.CreatedAt.Time)
+	require.Equal(t, entry1.CreatedAt, entry2.CreatedAt)
 	require.Equal(t, newAccount.ID, entry2.AccountID.Int64)
 	require.Equal(t, newAmount, entry2.Amount)
 }
