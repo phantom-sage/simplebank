@@ -26,8 +26,8 @@ func createRandomUser(t *testing.T) User {
 	require.NotEmpty(t, user)
 
 	require.NotEmpty(t, user.Username)
-	require.NotEmpty(t, user.PasswordChangedAt)
-	require.NotZero(t, user.CreatedAt)
+	require.NotEmpty(t, user.CreatedAt)
+	require.True(t, user.PasswordChangedAt.IsZero())
 
 	require.Equal(t, user.HashedPassword, randomHashedPassword)
 	require.Equal(t, user.FullName, randomFullname)
