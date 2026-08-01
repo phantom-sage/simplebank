@@ -5,13 +5,17 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/phantom-sage/simplebank/util"
 	"github.com/stretchr/testify/require"
 )
 
 func createRandomUser(t *testing.T) User {
-	//  username, hashed_password, full_name, email
+	password := gofakeit.Password(true, false, false, false, false, 16)
+	hashedPassword, err := util.HashPasswrod(password)
+	require.NoError(t, err)
+
 	randomUsername := gofakeit.Password(true, false, false, false, false, 16)
-	randomHashedPassword := gofakeit.Password(true, false, false, false, false, 16)
+	randomHashedPassword := hashedPassword
 	randomFullname := gofakeit.HackerNoun()
 	randomEmail := gofakeit.Email()
 
