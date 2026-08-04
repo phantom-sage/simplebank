@@ -121,7 +121,7 @@ func TestCreateUserAPI(t *testing.T) {
 			tc.buildStubs(store)
 
 			// start test HTTP server.
-			server := NewServer(store)
+			server := NewTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			url := "/api/users"
