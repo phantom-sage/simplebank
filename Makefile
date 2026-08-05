@@ -1,5 +1,5 @@
 postgres18:
-	docker container run -d -p5432:5432 --name postgres18 \
+	docker container run --network bank-network -d -p5432:5432 --name postgres18 \
 	-e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret \
 	postgres:18-alpine
 
