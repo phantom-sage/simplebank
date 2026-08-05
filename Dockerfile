@@ -9,7 +9,12 @@ RUN go build -o main main.go
 
 RUN apk add curl
 
-RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.19.1/migrate.linux-amd64.tar.gz | tar xvz
+RUN ARCH=$(uname -m) && \
+    case "$ARCH" in \
+      aarch64) ARCH="arm64" ;; \
+      x86_64)  ARCH="amd64" ;; \
+    esac && \
+    curl -L https://github.com/golang-migrate/migrate/releases/download/v4.19.1/migrate.linux-${ARCH}.tar.gz | tar xvz
 
 # Run stage.
 FROM alpine:3.23
