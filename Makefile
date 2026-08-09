@@ -1,3 +1,5 @@
+DB_URL=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
+
 postgres18:
 	docker container run --network bank-network -d -p5432:5432 --name postgres18 \
 	-e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret \
@@ -11,11 +13,11 @@ dropdb:
 
 migrateup:
 	migrate -path db/migration \
-	-database "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose up
+	-database "$(DB_URL)" -verbose up
 
 migratedown:
 	migrate -path db/migration -database \
-	"postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable" -verbose down
+	"$(DB_URL)" -verbose down
 
 sqlc:
 	sqlc generate
@@ -29,4 +31,7 @@ server:
 mock:
 	mockgen -destination ./db/mock/store.go -package mockdb github.com/phantom-sage/simplebank/db/sqlc Store
 
-.PHONY: postgres18 createdb dropdb migrateup migratedown sqlc test server mock
+db_schema:
+	npx -p @dbml/cli dbml2sql --postgres -o doc/schema.sql doc/db.dbml
+
+.PHONY: postgres18 createdb dropdb migrateup migratedown sqlc test server mock db_schema
