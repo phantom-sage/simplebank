@@ -36,9 +36,11 @@ db_schema:
 
 proto:
 	rm -rf pb/*.go
+	rm -rf doc/swagger/*.swagger.json
 	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
 	--go-grpc_out=pb --go-grpc_opt=paths=source_relative \
 	--grpc-gateway_out=pb --grpc-gateway_opt=paths=source_relative --grpc-gateway_opt=generate_unbound_methods=true \
+	--openapiv2_out=doc/swagger --openapiv2_opt=allow_merge=true,merge_file_name=simple_bank \
 	proto/*.proto
 
 .PHONY: postgres18 createdb dropdb migrateup migratedown sqlc test server mock db_schema proto
