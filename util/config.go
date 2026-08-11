@@ -8,6 +8,7 @@ import (
 
 // Config hold the configuration for the application.
 type Config struct {
+	Environment          string        `mapstructure:"ENVIRONMENT"`
 	DBConnUrl            string        `mapstructure:"DB_CONN_URL"`
 	MigrationUrl         string        `mapstructure:"MIGRATION_URL"`
 	HttpServerAddress    string        `mapstructure:"HTTP_SERVER_ADDRESS"`
