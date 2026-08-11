@@ -20,10 +20,12 @@ RETURNING *;
 
 -- name: UpdateUser :one
 UPDATE users
-  set hashed_password = $2,
-      full_name = $3,
-      email = $4
-WHERE username = $1
+SET
+  hashed_password = COALESCE(sqlc.narg(hashed_password), hashed_password),
+  full_name = COALESCE(sqlc.narg(full_name), full_name),
+  email = COALESCE(sqlc.narg(email), email)
+WHERE
+  username = sqlc.arg(username)
 RETURNING *;
 
 -- name: DeleteUser :exec
