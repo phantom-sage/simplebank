@@ -16,8 +16,6 @@ sql:
           go_type:
             import: "github.com/google/uuid"
             type: "UUID"
-        - column: "users.password_changed_at"
-          go_type: "time.Time"
         - column: "users.created_at"
           go_type: "time.Time"
         - column: "accounts.created_at"

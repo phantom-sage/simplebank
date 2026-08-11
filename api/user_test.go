@@ -14,6 +14,7 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	mockdb "github.com/phantom-sage/simplebank/db/mock"
 	db "github.com/phantom-sage/simplebank/db/sqlc"
 	"github.com/phantom-sage/simplebank/util"
@@ -143,12 +144,15 @@ func createRandomUser(t *testing.T) (db.User, string) {
 	hashedPassword, err := util.HashPasswrod(password)
 	require.NoError(t, err)
 	return db.User{
-		Username:          gofakeit.Password(true, false, false, false, false, 16),
-		HashedPassword:    hashedPassword,
-		FullName:          gofakeit.HackerNoun(),
-		Email:             gofakeit.Email(),
-		PasswordChangedAt: time.Now(),
-		CreatedAt:         time.Now(),
+		Username:       gofakeit.Password(true, false, false, false, false, 16),
+		HashedPassword: hashedPassword,
+		FullName:       gofakeit.HackerNoun(),
+		Email:          gofakeit.Email(),
+		PasswordChangedAt: pgtype.Timestamptz{
+			Time:  time.Now(),
+			Valid: true,
+		},
+		CreatedAt: time.Now(),
 	}, password
 }
 
@@ -164,5 +168,5 @@ func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user db.User) {
 	require.Equal(t, user.FullName, gotUser.FullName)
 	require.Equal(t, user.Email, gotUser.Email)
 	require.WithinDuration(t, user.CreatedAt, gotUser.CreatedAt, time.Second)
-	require.WithinDuration(t, user.PasswordChangedAt, gotUser.PasswordChangedAt, time.Second)
+	require.WithinDuration(t, user.PasswordChangedAt.Time, gotUser.PasswordChangedAt.Time, time.Second)
 }
