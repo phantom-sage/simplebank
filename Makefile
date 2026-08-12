@@ -19,17 +19,21 @@ migratedown:
 	migrate -path db/migration -database \
 	"$(DB_URL)" -verbose down
 
+new_migration:
+	migrate create -ext sql -dir db/migration -seq $(name)
+
 sqlc:
 	sqlc generate
 
 test:
-	go test -cover -count=1 -v ./...
+	go test -cover -count=1 -v -short ./...
 
 server:
 	go run main.go
 
 mock:
 	mockgen -destination ./db/mock/store.go -package mockdb github.com/phantom-sage/simplebank/db/sqlc Store
+	mockgen -package mockwk -destination worker/mock/distributor.go github.com/phantom-sage/simplebank/worker TaskDistributor
 
 db_schema:
 	npx -p @dbml/cli dbml2sql --postgres -o doc/schema.sql doc/db.dbml
@@ -44,4 +48,7 @@ proto:
 	proto/*.proto
 	statik -src=./doc/swagger -dest=./doc
 
-.PHONY: postgres18 createdb dropdb migrateup migratedown sqlc test server mock db_schema proto
+redis:
+	docker run --name redis -p 6379:6379 -d redis:7-alpine
+
+.PHONY: postgres18 createdb dropdb migrateup migratedown new_migration sqlc test server mock db_schema proto redis
