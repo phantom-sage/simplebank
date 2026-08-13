@@ -10,19 +10,19 @@ import (
 	"github.com/phantom-sage/simplebank/util"
 )
 
-var testQueries *Queries
-var testConn *pgxpool.Pool
+var testStore Store
 
 func TestMain(m *testing.M) {
-	config, err := util.LoadConfig("../../")
+	config, err := util.LoadConfig("../..")
 	if err != nil {
-		log.Fatalln("can not load configuration file", err)
-	}
-	testConn, err = pgxpool.New(context.Background(), config.DBConnUrl)
-	if err != nil {
-		log.Fatalln("can not connect to db", err)
+		log.Fatal("cannot load config:", err)
 	}
 
-	testQueries = New(testConn)
+	connPool, err := pgxpool.New(context.Background(), config.DBConnUrl)
+	if err != nil {
+		log.Fatal("cannot connect to db:", err)
+	}
+
+	testStore = NewStore(connPool)
 	os.Exit(m.Run())
 }

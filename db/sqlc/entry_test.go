@@ -18,7 +18,7 @@ func createRandomEntry(t *testing.T) Entry {
 		AccountID: pgtype.Int8{Int64: randomAccount.ID, Valid: true},
 		Amount:    randomAmount,
 	}
-	entry, err := testQueries.CreateEntry(context.Background(), arg)
+	entry, err := testStore.CreateEntry(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry)
 
@@ -37,7 +37,7 @@ func TestCreateEntry(t *testing.T) {
 
 func TestGetEntry(t *testing.T) {
 	entry1 := createRandomEntry(t)
-	entry2, err := testQueries.GetEntry(context.Background(), entry1.ID)
+	entry2, err := testStore.GetEntry(context.Background(), entry1.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry2)
 
@@ -57,7 +57,7 @@ func TestListEntries(t *testing.T) {
 		Limit:  int32(5),
 		Offset: int32(5),
 	}
-	entries, err := testQueries.ListEntrys(context.Background(), arg)
+	entries, err := testStore.ListEntrys(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, entries)
 	require.Len(t, entries, 5)
@@ -80,7 +80,7 @@ func TestUpdateEntry(t *testing.T) {
 		AccountID: pgtype.Int8{Int64: newAccount.ID, Valid: true},
 		Amount:    newAmount,
 	}
-	entry2, err := testQueries.UpdateEntry(context.Background(), arg)
+	entry2, err := testStore.UpdateEntry(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry2)
 
@@ -92,10 +92,10 @@ func TestUpdateEntry(t *testing.T) {
 
 func TestDeleteEntry(t *testing.T) {
 	entry1 := createRandomEntry(t)
-	err := testQueries.DeleteEntry(context.Background(), entry1.ID)
+	err := testStore.DeleteEntry(context.Background(), entry1.ID)
 	require.NoError(t, err)
 
-	entry2, err := testQueries.GetEntry(context.Background(), entry1.ID)
+	entry2, err := testStore.GetEntry(context.Background(), entry1.ID)
 	require.Error(t, err)
 	require.EqualError(t, err, pgx.ErrNoRows.Error())
 	require.Empty(t, entry2)

@@ -26,7 +26,7 @@ func createRandomUser(t *testing.T) User {
 		FullName:       randomFullname,
 		Email:          randomEmail,
 	}
-	user, err := testQueries.CreateUser(context.Background(), arg)
+	user, err := testStore.CreateUser(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
 
@@ -49,7 +49,7 @@ func TestUpdateUserOnlyFullName(t *testing.T) {
 	oldUser := createRandomUser(t)
 
 	newFullName := gofakeit.HackerNoun()
-	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: oldUser.Username,
 		FullName: pgtype.Text{
 			String: newFullName,
@@ -68,7 +68,7 @@ func TestUpdateUserOnlyEmail(t *testing.T) {
 	oldUser := createRandomUser(t)
 
 	newEmail := gofakeit.Email()
-	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: oldUser.Username,
 		Email: pgtype.Text{
 			String: newEmail,
@@ -90,7 +90,7 @@ func TestUpdateUserOnlyPassword(t *testing.T) {
 	newHashedPassword, err := util.HashPasswrod(newPassword)
 	require.NoError(t, err)
 
-	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: oldUser.Username,
 		HashedPassword: pgtype.Text{
 			String: newHashedPassword,
@@ -115,7 +115,7 @@ func TestUpdateUserAllFields(t *testing.T) {
 	newHashedPassword, err := util.HashPasswrod(newPassword)
 	require.NoError(t, err)
 
-	updatedUser, err := testQueries.UpdateUser(context.Background(), UpdateUserParams{
+	updatedUser, err := testStore.UpdateUser(context.Background(), UpdateUserParams{
 		Username: oldUser.Username,
 		FullName: pgtype.Text{
 			String: newFullName,
