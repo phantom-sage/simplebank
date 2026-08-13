@@ -28,3 +28,5 @@ sql:
           go_type: "time.Time"
         - column: "sessions.created_at"
           go_type: "time.Time"
+        - column: "users.password_changed_at"
+          go_type: "time.Time"

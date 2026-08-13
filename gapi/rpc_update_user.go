@@ -54,10 +54,7 @@ func (server *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 			Valid:  true,
 		}
 
-		arg.PasswordChangedAt = pgtype.Timestamptz{
-			Time:  time.Now(),
-			Valid: true,
-		}
+		arg.PasswordChangedAt = time.Now()
 	}
 
 	user, err := server.store.UpdateUser(ctx, arg)

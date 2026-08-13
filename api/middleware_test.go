@@ -83,7 +83,7 @@ func TestAuthMiddleware(t *testing.T) {
 	for i := range testCases {
 		tc := testCases[i]
 		t.Run(tc.name, func(t *testing.T) {
-			server := NewTestServer(t, nil)
+			server := newTestServer(t, nil)
 
 			authPath := "/auth"
 			server.router.GET(authPath, authMiddleware(server.tokenMaker), func(ctx *gin.Context) {
